@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <cpl.h>
+
 #include <deepskydiscovery/core.hpp>
 
 namespace deepskydiscovery {

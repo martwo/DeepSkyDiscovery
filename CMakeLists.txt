@@ -56,7 +56,7 @@ if(${PROJECT_NAME}_CONFIGURED_SUCCESSFULLY)
     list(APPEND ${PROJECT_NAME}_libdeepskydiscovery_INCLUDE_DIRS
         ${BOOST_INCLUDE_DIRS}
         ${PYTHON_INCLUDE_DIRS}
-        ${CPL_INCLUDE_DIRS}
+        ${CPL_INCLUDE_DIR}
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/src
     )
