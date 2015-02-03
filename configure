@@ -1,0 +1,67 @@
+#!/usr/bin/env python
+
+from optparse import OptionParser
+from os import system
+
+parser = OptionParser()
+parser.add_option("", "--prefix", type="string", dest="prefix", default=".",
+    help="The path where the software should get installed to. "
+         "By default it installs into the build directory.", metavar="PATH")
+parser.add_option("", "--build-type", type="string", dest="build_type", default="Release",
+    help="The cmake build type. Possible values are: None, Debug, Release")
+parser.add_option("", "--compiler", type="string", dest="compiler", default="gcc",
+    help="The C/C++ compiler to use. Possible values are \"gcc\" and \"clang\".")
+parser.add_option("", "--cpl-include-path", type="string", dest="cpl_include_path", default="",
+    help="The path where the include files of the CPL tool are located on this system.")
+parser.add_option("", "--cpl-library-path", type="string", dest="cpl_library_path", default="",
+    help="The path where the library files of the CPL tool are located on this system.")
+parser.add_option("", "--user", action="store_true", dest="install_python_package_into_user_home", default=False,
+    help="Flag if the deepskydiscovery python package should be installed inside the user's home directory.")
+(options, args) = parser.parse_args()
+
+if(options.compiler == 'gcc'):
+    c_compiler = '`which gcc`'
+    cxx_compiler = '`which g++`'
+elif(options.compiler == 'clang'):
+    c_compiler = '`which clang`'
+    cxx_compiler = '`which clang++`'
+else:
+    raise ValueError("The compiler option %s is not supported!"%(options.compiler))
+
+cmake_build_env = {}
+if(options.cpl_include_path != '' and
+   options.cpl_library_path != ''
+  ):
+    cmake_build_env.update({
+        'CPL_INCLUDE_PATH': options.cpl_include_path,
+        'CPL_LIBRARY_PATH': options.cpl_library_path
+    })
+
+if(options.install_python_package_into_user_home):
+    install_python_package_into_user_home = 'ON'
+else:
+    install_python_package_into_user_home = 'OFF'
+
+print("Configuring deepskydiscovery ...")
+print("    install prefix: %s"%(options.prefix))
+print("    C compiler    : %s"%(c_compiler))
+print("    C++ compiler  : %s"%(cxx_compiler))
+print("")
+print("    special environment variables:")
+print("    ------------------------------")
+for (env_name, env_value) in cmake_build_env.iteritems():
+    print("    %s = %s"%(env_name, env_value))
+
+env_str = ';'.join(["export %s=%s"%(n,v) for (n,v) in cmake_build_env.iteritems()])
+if(len(env_str) > 0):
+    env_str += ';'
+
+system("rm -rf build")
+system("mkdir -p build")
+system("cd build && %s /usr/bin/env cmake -DCMAKE_BUILD_TYPE=\"%s\" -DCMAKE_INSTALL_PREFIX=\"%s\" -DCMAKE_C_COMPILER=%s -DCMAKE_CXX_COMPILER=%s -DINSTALL_PYTHON_PACKAGE_INTO_USER_HOME=%s .."%(
+    env_str,
+    options.build_type,
+    options.prefix,
+    c_compiler,
+    cxx_compiler,
+    install_python_package_into_user_home))
