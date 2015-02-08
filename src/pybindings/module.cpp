@@ -14,9 +14,12 @@ namespace bp = boost::python;
 
 namespace deepskydiscovery {
 
+void register_Image();
+
 }//namespace deepskydiscovery
 
 BOOST_PYTHON_MODULE(core)
 {
-    bp::def("helloworld", &deepskydiscovery::helloworld);
+    deepskydiscovery::initialize();
+    deepskydiscovery::register_Image();
 }

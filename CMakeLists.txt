@@ -40,14 +40,16 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 include(${CMAKE_SOURCE_DIR}/cmake/add_python_module.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/find_tool.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/tools/boost.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/tools/boostnumpy.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/tools/cpl.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/tools/python.cmake)
 
 find_boost()
 find_python()
+find_boostnumpy()
 find_cpl()
 
-if(NOT (BOOST_FOUND AND PYTHON_FOUND AND CPL_FOUND))
+if(NOT (BOOST_FOUND AND BOOSTNUMPY_FOUND AND PYTHON_FOUND AND CPL_FOUND))
     set(${PROJECT_NAME}_CONFIGURED_SUCCESSFULLY FALSE)
 endif()
 
@@ -56,6 +58,7 @@ if(${PROJECT_NAME}_CONFIGURED_SUCCESSFULLY)
     list(APPEND ${PROJECT_NAME}_libdeepskydiscovery_INCLUDE_DIRS
         ${BOOST_INCLUDE_DIRS}
         ${PYTHON_INCLUDE_DIRS}
+        ${BOOSTNUMPY_INCLUDE_DIRS}
         ${CPL_INCLUDE_DIR}
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/src
@@ -64,6 +67,7 @@ if(${PROJECT_NAME}_CONFIGURED_SUCCESSFULLY)
     list(APPEND ${PROJECT_NAME}_libdeepskydiscovery_LIBRARIES
         ${PYTHON_LIBRARIES}
         ${BOOST_LIBRARIES}
+        ${BOOSTNUMPY_LIBRARIES}
         ${CPL_LIBRARIES}
     )
 
@@ -104,6 +108,7 @@ if(${PROJECT_NAME}_CONFIGURED_SUCCESSFULLY)
     # interface to the C++ code of ndhist.
     list(APPEND ${PROJECT_NAME}_core_LIBRARY_LIST deepskydiscovery)
     add_python_module(core ${${PROJECT_NAME}_core_LIBRARY_LIST}
+        src/pybindings/image.cpp
         src/pybindings/module.cpp
     )
 

@@ -3,7 +3,9 @@
 
 namespace deepskydiscovery {
 
-void helloworld(int i);
+/** Initializes the library and also the CPL library.
+ */
+void initialize();
 
 }//namespace deepskydiscovery
 
