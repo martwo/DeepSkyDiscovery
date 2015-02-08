@@ -14,12 +14,18 @@ namespace bp = boost::python;
 
 namespace deepskydiscovery {
 
+void register_error_types();
+void register_BiVector();
 void register_Image();
+void register_Mask();
 
 }//namespace deepskydiscovery
 
 BOOST_PYTHON_MODULE(core)
 {
     deepskydiscovery::initialize();
+    deepskydiscovery::register_error_types();
+    deepskydiscovery::register_BiVector();
     deepskydiscovery::register_Image();
+    deepskydiscovery::register_Mask();
 }

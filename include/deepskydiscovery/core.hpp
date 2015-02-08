@@ -7,6 +7,8 @@ namespace deepskydiscovery {
  */
 void initialize();
 
+
+
 }//namespace deepskydiscovery
 
 #endif // !DEEPSKYDISCOVERY_CORE_HPP_INCLUDED

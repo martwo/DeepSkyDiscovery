@@ -108,7 +108,10 @@ if(${PROJECT_NAME}_CONFIGURED_SUCCESSFULLY)
     # interface to the C++ code of ndhist.
     list(APPEND ${PROJECT_NAME}_core_LIBRARY_LIST deepskydiscovery)
     add_python_module(core ${${PROJECT_NAME}_core_LIBRARY_LIST}
+        src/pybindings/error.cpp
+        src/pybindings/bivector.cpp
         src/pybindings/image.cpp
+        src/pybindings/mask.cpp
         src/pybindings/module.cpp
     )
 

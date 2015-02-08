@@ -46,14 +46,35 @@ void register_Image()
     .add_property("size_y", &Image::GetSizeY
         , "The size of the image in the y-direction.")
 
+    .add_property("bpm", bp::make_function(
+          &Image::py_get_bpm_ndarray
+        , bn::ndarray_accessor_return())
+        , "The ndarray holding the bad pixel mask of the image.")
+
     .add_property("data", bp::make_function(
           &Image::py_get_ndarray
         , bn::ndarray_accessor_return())
         , "The ndarray holding the data of the image.")
 
+    .def("accept", &Image::Accept
+        , (bp::arg("self"), bp::arg("xpos"), bp::arg("ypos"))
+        , "Sets the specified pixel as good in the image. "
+          "The index of each dimension must be in the interval [0,dim_size), "
+          "where dim_size is the size of the particular dimension.")
     .def("get", &Image::Get
+        , (bp::arg("self"), bp::arg("xpos"), bp::arg("ypos"))
         , "Gets the pixel value at the specified position. If it is a bad "
           "pixel, or an error occurred, NAN is returned.")
+    .def("reject", &Image::Reject
+        , (bp::arg("self"), bp::arg("xpos"), bp::arg("ypos"))
+        , "Sets the specified pixel as bad in the image. "
+          "The index of each dimension must be in the interval [0,dim_size), "
+          "where dim_size is the size of the particular dimension.")
+    .def("shift", &Image::Shift
+        , (bp::arg("self"), bp::arg("dx"), bp::arg("dy"))
+        , "Shifts the image by the specified number of pixels (can be "
+          "negative). The new zones (in the result image) where no new value "
+          "is computed are set to 0 and flagged as bad pixels.")
     ;
 }
 
