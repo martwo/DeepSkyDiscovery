@@ -16,6 +16,7 @@
 #include <cpl.h>
 
 #include <deepskydiscovery/error.hpp>
+#include <deepskydiscovery/bivector.hpp>
 
 namespace bp = boost::python;
 namespace bn = boost::numpy;
@@ -114,6 +115,28 @@ class Image
         return value;
     }
 
+    cpl_image *
+    GetCPLImage() const
+    {
+        return cpl_image_;
+    }
+
+    std::pair<double, double>
+    GetFWHM(size_t xpos, size_t ypos)
+    {
+        std::pair<double, double> ret = std::make_pair(0, 0);
+        cpl_error_code errcode = cpl_image_get_fwhm(cpl_image_, xpos+1, ypos+1, &ret.first, &ret.second);
+        if(errcode != CPL_ERROR_NONE)
+        {
+            std::string msg(cpl_error_get_message());
+            std::stringstream ss;
+            ss << "Could not get FWHM of pixel ("<<xpos<<","<<ypos<<"): "<<msg;
+            throw RuntimeError(ss.str());
+        }
+        std::cout << "ret.first = "<<ret.first<< "; ret.second = "<<ret.second<<std::endl;
+        return ret;
+    }
+
     /** Returns the size of the image in the x-dimension.
      */
     size_t
@@ -128,6 +151,22 @@ class Image
     GetSizeY() const
     {
         return cpl_image_get_size_y(cpl_image_);
+    }
+
+    BiVector
+    IQE(size_t xpos, size_t ypos, size_t dx, size_t dy)
+    {
+        cpl_bivector * vec = cpl_image_iqe(cpl_image_, xpos, ypos, dx, dy);
+        if(! vec)
+        {
+            std::string msg(cpl_error_get_message());
+            std::stringstream ss;
+            ss << "Could not compute an image quality estimation for pixel "
+               << "("<<xpos<<","<<ypos<<"): "<<msg;
+            throw RuntimeError(ss.str());
+        }
+        BiVector ret(vec);
+        return ret;
     }
 
     /** Sets the specified pixel as bad in the image.

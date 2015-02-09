@@ -30,13 +30,13 @@ void register_BiVector()
     .add_property("size", &BiVector::GetSize
         , "The size of the BiVector.")
     .add_property("x", bp::make_function(
-          &BiVector::py_get_x_ndarray
-        , bn::ndarray_accessor_return())
-        , "The ndarray holding the x-vector of the BiVector object.")
+          &BiVector::GetX
+        , bp::return_internal_reference<>())
+        , "The Vector object holding the x-values of the BiVector object.")
     .add_property("y", bp::make_function(
-          &BiVector::py_get_y_ndarray
-        , bn::ndarray_accessor_return())
-        , "The ndarray holding the y-vector of the BiVector object.")
+          &BiVector::GetY
+        , bp::return_internal_reference<>())
+        , "The Vector object holding the y-values of the BiVector object.")
     ;
 }
 

@@ -18,6 +18,8 @@ void register_error_types();
 void register_BiVector();
 void register_Image();
 void register_Mask();
+void register_Vector();
+void register_core();
 
 }//namespace deepskydiscovery
 
@@ -28,4 +30,6 @@ BOOST_PYTHON_MODULE(core)
     deepskydiscovery::register_BiVector();
     deepskydiscovery::register_Image();
     deepskydiscovery::register_Mask();
+    deepskydiscovery::register_Vector();
+    deepskydiscovery::register_core();
 }

@@ -18,6 +18,19 @@ namespace bn = boost::numpy;
 
 namespace deepskydiscovery {
 
+namespace detail {
+
+static
+bp::tuple
+get_fwhm(Image & self, size_t xpos, size_t ypos)
+{
+    std::pair<double, double> ret = self.GetFWHM(xpos, ypos);
+    bp::tuple t = bp::make_tuple<double, double>(ret.first, ret.second);
+    return t;
+}
+
+}//namespace detail
+
 void register_Image()
 {
     bp::enum_<image::DType>("dtype")
@@ -65,6 +78,13 @@ void register_Image()
         , (bp::arg("self"), bp::arg("xpos"), bp::arg("ypos"))
         , "Gets the pixel value at the specified position. If it is a bad "
           "pixel, or an error occurred, NAN is returned.")
+    .def("get_fwhm", &detail::get_fwhm
+        , (bp::arg("self"), bp::arg("xpos"), bp::arg("ypos"))
+        , "Gets the full-width-at-half-maximum for an object at position "
+          "(xpos, ypos).")
+    .def("iqe", &Image::IQE
+        , (bp::arg("self"), bp::arg("xpos"), bp::arg("ypos"), bp::arg("dx"), bp::arg("dy"))
+        , "")
     .def("reject", &Image::Reject
         , (bp::arg("self"), bp::arg("xpos"), bp::arg("ypos"))
         , "Sets the specified pixel as bad in the image. "
