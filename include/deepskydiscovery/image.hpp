@@ -232,8 +232,8 @@ class Image
         shape[0] = GetSizeX();
         shape[1] = GetSizeY();
         std::vector<intptr_t> strides(2);
-        strides[1] = dt.get_itemsize();
-        strides[0] = shape[1]*strides[1];
+        strides[0] = dt.get_itemsize();
+        strides[1] = shape[0]*strides[0];
         return bn::from_data(cpl_image_get_data(cpl_image_), dt, shape, strides, NULL);
     }
 
