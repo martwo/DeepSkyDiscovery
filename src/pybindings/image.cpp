@@ -7,9 +7,11 @@
  *
  */
 #include <boost/python.hpp>
+#include <boost/python/operators.hpp>
 
 #include <boost/numpy.hpp>
 #include <boost/numpy/ndarray_accessor_return.hpp>
+
 
 #include <deepskydiscovery/image.hpp>
 
@@ -53,6 +55,11 @@ void register_Image()
         , "Loads the specified image from disc."
         )
     )
+    .def(bp::init<size_t, size_t, image::DType>(
+          ( bp::arg("width")
+          , bp::arg("height")
+          , bp::arg("dtype"))
+        , "Creates an image of a certain width and height of the given data type."))
 
     .add_property("size_x", &Image::GetSizeX
         , "The size of the image in the x-direction.")
@@ -67,6 +74,7 @@ void register_Image()
     .add_property("data", bp::make_function(
           &Image::py_get_ndarray
         , bn::ndarray_accessor_return())
+        , &Image::py_set_ndarray
         , "The ndarray holding the data of the image.")
 
     .def("accept", &Image::Accept
@@ -74,6 +82,17 @@ void register_Image()
         , "Sets the specified pixel as good in the image. "
           "The index of each dimension must be in the interval [0,dim_size), "
           "where dim_size is the size of the particular dimension.")
+    .def("empty_like", &Image::EmptyLike
+        , (bp::arg("self"))
+        , "Creates a new image with the same dimensions and data type as this "
+          "image.")
+    .def("fill_noise_uniform", &Image::FillNoiseUniform
+        , ( bp::arg("self")
+          , bp::arg("vmin")
+          , bp::arg("vmax")
+          )
+        , "Fills the image with uniform random noise with pixel values ranging "
+          "from ``vmin`` to ``vmax``.")
     .def("get", &Image::Get
         , (bp::arg("self"), bp::arg("xpos"), bp::arg("ypos"))
         , "Gets the pixel value at the specified position. If it is a bad "
@@ -82,6 +101,10 @@ void register_Image()
         , (bp::arg("self"), bp::arg("xpos"), bp::arg("ypos"))
         , "Gets the full-width-at-half-maximum for an object at position "
           "(xpos, ypos).")
+    .def("get_min_window", &Image::GetMinWindow
+        , (bp::arg("self"), bp::arg("llx"), bp::arg("lly"), bp::arg("urx"), bp::arg("ury"))
+        , "Determines the minimal pixel value within the specified image window, "
+          "which is specified through the lower left and upper right position.")
     .def("iqe", &Image::IQE
         , (bp::arg("self"), bp::arg("xpos"), bp::arg("ypos"), bp::arg("dx"), bp::arg("dy"))
         , "")
@@ -95,6 +118,9 @@ void register_Image()
         , "Shifts the image by the specified number of pixels (can be "
           "negative). The new zones (in the result image) where no new value "
           "is computed are set to 0 and flagged as bad pixels.")
+
+    .def(bp::self += bp::self)
+    .def(bp::self -= bp::self)
     ;
 }
 

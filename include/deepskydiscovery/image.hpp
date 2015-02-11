@@ -47,12 +47,47 @@ class Image
       , ext_idx_(ext_idx)
     {
         cpl_image_ = cpl_image_load(pathfilename.c_str(), (cpl_type)dtype_, plane_idx_, ext_idx_);
-
         if(! cpl_image_)
         {
+            std::string msg(cpl_error_get_message());
             std::stringstream ss;
             ss << "The image file \""<< pathfilename
-               <<"\" could not be loaded!";
+               <<"\" could not be loaded: "<<msg;
+            throw RuntimeError(ss.str());
+        }
+    }
+
+    Image(
+        size_t width
+      , size_t height
+      , image::DType dtype
+    )
+      : dtype_(dtype)
+      , plane_idx_(0)
+      , ext_idx_(0)
+    {
+        cpl_image_ = cpl_image_new(width, height, (cpl_type)dtype_);
+        if(! cpl_image_)
+        {
+            std::string msg(cpl_error_get_message());
+            std::stringstream ss;
+            ss << "The image of size "<<width<<"x"<<height<<" "
+               << "could not be created: "<<msg;
+            throw RuntimeError(ss.str());
+        }
+    }
+
+    Image(Image const & other)
+      : dtype_(other.dtype_)
+      , plane_idx_(other.plane_idx_)
+      , ext_idx_(other.ext_idx_)
+    {
+        cpl_image_ = cpl_image_duplicate(other.cpl_image_);
+        if(! cpl_image_)
+        {
+            std::string msg(cpl_error_get_message());
+            std::stringstream ss;
+            ss << "Could not copy the image :"<<msg;
             throw RuntimeError(ss.str());
         }
     }
@@ -90,6 +125,28 @@ class Image
                    << msg;
                 throw RuntimeError(ss.str());
             }
+        }
+    }
+
+    /** Creates an empty image with the same dimensions and data type as this
+     *  image.
+     */
+    Image
+    EmptyLike()
+    {
+        return Image(GetSizeX(), GetSizeY(), GetType());
+    }
+
+    void
+    FillNoiseUniform(double vmin, double vmax)
+    {
+        cpl_error_code errcode = cpl_image_fill_noise_uniform(cpl_image_, vmin, vmax);
+        if(errcode != CPL_ERROR_NONE)
+        {
+            std::string msg(cpl_error_get_message());
+            std::stringstream ss;
+            ss << "Could not fill the image with noise uniformly: "<<msg;
+            throw RuntimeError(ss.str());
         }
     }
 
@@ -133,8 +190,25 @@ class Image
             ss << "Could not get FWHM of pixel ("<<xpos<<","<<ypos<<"): "<<msg;
             throw RuntimeError(ss.str());
         }
-        std::cout << "ret.first = "<<ret.first<< "; ret.second = "<<ret.second<<std::endl;
         return ret;
+    }
+
+    /** Determines the minimal pixel value contained in the specified sub
+     *  window (specified through its lower left and upper right point).
+     */
+    double
+    GetMinWindow(size_t llx, size_t lly, size_t urx, size_t ury) const
+    {
+        double value = cpl_image_get_min_window(cpl_image_, llx, lly, urx, ury);
+        if(cpl_error_get_code() != CPL_ERROR_NONE)
+        {
+            std::string msg(cpl_error_get_message());
+            std::stringstream ss;
+            ss << "Could not determine the minimal pixel value of the image "
+               << "window defined by ("<<llx<<","<<lly<<";"<<urx<<","<<ury<<"): "<<msg;
+            throw RuntimeError(ss.str());
+        }
+        return value;
     }
 
     /** Returns the size of the image in the x-dimension.
@@ -151,6 +225,12 @@ class Image
     GetSizeY() const
     {
         return cpl_image_get_size_y(cpl_image_);
+    }
+
+    image::DType
+    GetType() const
+    {
+        return image::DType(cpl_image_get_type(cpl_image_));
     }
 
     BiVector
@@ -237,6 +317,13 @@ class Image
         return bn::from_data(cpl_image_get_data(cpl_image_), dt, shape, strides, NULL);
     }
 
+    void
+    py_set_ndarray(bn::ndarray const & arr)
+    {
+        bn::ndarray old_arr = py_get_ndarray();
+        bn::copy_into(old_arr, arr);
+    }
+
     bn::ndarray
     py_get_bpm_ndarray() const
     {
@@ -249,6 +336,34 @@ class Image
         strides[1] = dt.get_itemsize();
         strides[0] = shape[1]*strides[1];
         return bn::from_data(cpl_mask_get_data(mask), dt, shape, strides, NULL);
+    }
+
+    Image &
+    operator+=(Image const & other)
+    {
+        cpl_error_code errcode = cpl_image_add(cpl_image_, other.cpl_image_);
+        if(errcode != CPL_ERROR_NONE)
+        {
+            std::string msg(cpl_error_get_message());
+            std::stringstream ss;
+            ss << "Could not add image to this image: "<<msg;
+            throw RuntimeError(ss.str());
+        }
+        return *this;
+    }
+
+    Image &
+    operator-=(Image const & other)
+    {
+        cpl_error_code errcode = cpl_image_subtract(cpl_image_, other.cpl_image_);
+        if(errcode != CPL_ERROR_NONE)
+        {
+            std::string msg(cpl_error_get_message());
+            std::stringstream ss;
+            ss << "Could not subtract image from this image: "<<msg;
+            throw RuntimeError(ss.str());
+        }
+        return *this;
     }
 
   protected:
