@@ -101,6 +101,10 @@ void register_Image()
         , (bp::arg("self"), bp::arg("xpos"), bp::arg("ypos"))
         , "Gets the full-width-at-half-maximum for an object at position "
           "(xpos, ypos).")
+    .def("get_max_window", &Image::GetMinWindow
+        , (bp::arg("self"), bp::arg("llx"), bp::arg("lly"), bp::arg("urx"), bp::arg("ury"))
+        , "Determines the maximal pixel value within the specified image window, "
+          "which is specified through the lower left and upper right position.")
     .def("get_min_window", &Image::GetMinWindow
         , (bp::arg("self"), bp::arg("llx"), bp::arg("lly"), bp::arg("urx"), bp::arg("ury"))
         , "Determines the minimal pixel value within the specified image window, "

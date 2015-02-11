@@ -193,6 +193,24 @@ class Image
         return ret;
     }
 
+    /** Determines the maximal pixel value contained in the specified sub
+     *  window (specified through its lower left and upper right point).
+     */
+    double
+    GetMaxWindow(size_t llx, size_t lly, size_t urx, size_t ury) const
+    {
+        double value = cpl_image_get_max_window(cpl_image_, llx, lly, urx, ury);
+        if(cpl_error_get_code() != CPL_ERROR_NONE)
+        {
+            std::string msg(cpl_error_get_message());
+            std::stringstream ss;
+            ss << "Could not determine the maximal pixel value of the image "
+               << "window defined by ("<<llx<<","<<lly<<";"<<urx<<","<<ury<<"): "<<msg;
+            throw RuntimeError(ss.str());
+        }
+        return value;
+    }
+
     /** Determines the minimal pixel value contained in the specified sub
      *  window (specified through its lower left and upper right point).
      */

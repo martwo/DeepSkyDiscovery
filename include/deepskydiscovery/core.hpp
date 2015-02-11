@@ -31,6 +31,8 @@ py_geom_img_offset_fine(
   , size_t m_hy
 );
 
+
+
 }//namespace deepskydiscovery
 
 #endif // !DEEPSKYDISCOVERY_CORE_HPP_INCLUDED
